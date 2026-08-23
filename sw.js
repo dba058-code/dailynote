@@ -1,6 +1,6 @@
 /* 코드를 고친 뒤에는 아래 VERSION 숫자를 반드시 올리세요.
    올리지 않으면 폰에 예전 화면이 계속 나옵니다. */
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CACHE = `dailynote-${VERSION}`;
 const SHELL = [
   './',
