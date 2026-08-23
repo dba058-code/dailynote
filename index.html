@@ -332,14 +332,18 @@ async function exportData(){
   const name = `dailynote-${todayStr()}.json`;
   const file = new File([JSON.stringify(payload, null, 2)], name, { type:'application/json' });
 
+  function downloadFallback(){
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  }
+
   try {
     if (navigator.canShare && navigator.canShare({ files:[file] })) {
       await navigator.share({ files:[file], title:name });
     } else {
-      const url = URL.createObjectURL(file);
-      const a = document.createElement('a');
-      a.href = url; a.download = name; a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      downloadFallback();
     }
     localStorage.setItem('lastBackup', new Date().toISOString());
     checkBackup();
@@ -347,10 +351,22 @@ async function exportData(){
     flash('내보냄');
   } catch (e) {
     if (e && e.name === 'AbortError') return;
+    try {
+      downloadFallback();
+      localStorage.setItem('lastBackup', new Date().toISOString());
+      checkBackup();
+      closeSheet();
+      flash('파일로 저장됨');
+      return;
+    } catch (e2) { /* 아래 알림으로 진행 */ }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;
     flash('내보내기 실패');
   }
 }
-
+    flash('내보내기 실패');
+  }
+}
 async function importData(file){
   try {
     const data = JSON.parse(await file.text());
